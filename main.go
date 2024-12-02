@@ -4,11 +4,14 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+
+	"github.com/JorgeToAn/pokedexcli/internal/api"
 )
 
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	commands := getCommands()
+	config := api.DefaultConfig
 
 	// REPL loop
 	for {
@@ -22,6 +25,6 @@ func main() {
 			continue
 		}
 
-		command.callback()
+		command.callback(&config)
 	}
 }
