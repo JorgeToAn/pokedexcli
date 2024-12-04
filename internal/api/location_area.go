@@ -35,6 +35,20 @@ func getPrevURL(c *Config) (string, error) {
 
 func GetNextLocationAreas(c *Config) ([]LocationArea, error) {
 	nextURL := getNextURL(c)
+
+	if data, ok := c.cache.Get(nextURL); ok {
+		fmt.Println("using cache!")
+		result := locationAreasResponse{}
+		if err := json.Unmarshal(data, &result); err != nil {
+			return nil, err
+		}
+
+		c.Next = result.Next
+		c.Previous = result.Previous
+
+		return result.Results, nil
+	}
+
 	resp, err := http.Get(nextURL)
 	if err != nil {
 		return nil, err
@@ -51,6 +65,7 @@ func GetNextLocationAreas(c *Config) ([]LocationArea, error) {
 		return nil, err
 	}
 
+	c.cache.Add(nextURL, data)
 	c.Next = result.Next
 	c.Previous = result.Previous
 
@@ -61,6 +76,18 @@ func GetPreviousLocationAreas(c *Config) ([]LocationArea, error) {
 	prevURL, err := getPrevURL(c)
 	if err != nil {
 		return nil, err
+	}
+
+	if data, ok := c.cache.Get(prevURL); ok {
+		result := locationAreasResponse{}
+		if err := json.Unmarshal(data, &result); err != nil {
+			return nil, err
+		}
+
+		c.Next = result.Next
+		c.Previous = result.Previous
+
+		return result.Results, nil
 	}
 
 	resp, err := http.Get(prevURL)
@@ -79,6 +106,7 @@ func GetPreviousLocationAreas(c *Config) ([]LocationArea, error) {
 		return nil, err
 	}
 
+	c.cache.Add(prevURL, data)
 	c.Next = result.Next
 	c.Previous = result.Previous
 

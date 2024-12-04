@@ -11,7 +11,7 @@ import (
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	commands := getCommands()
-	config := api.DefaultConfig
+	config := api.NewConfig()
 
 	// REPL loop
 	for {
