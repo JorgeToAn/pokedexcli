@@ -1,21 +1,24 @@
 package api
 
 import (
+	"net/http"
 	"time"
 
 	"github.com/JorgeToAn/pokedexcli/internal/pokecache"
 )
 
-type Config struct {
-	Next     *string
-	Previous *string
-	cache    pokecache.Cache
+const (
+	baseURL = "https://pokeapi.co/api/v2"
+)
+
+type Client struct {
+	httpClient http.Client
+	cache      pokecache.Cache
 }
 
-func NewConfig() Config {
-	return Config{
-		Next:     nil,
-		Previous: nil,
-		cache:    pokecache.NewCache(time.Second * 30),
+func NewClient(interval time.Duration) Client {
+	return Client{
+		httpClient: *http.DefaultClient,
+		cache:      pokecache.NewCache(interval),
 	}
 }

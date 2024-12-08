@@ -1,77 +1,63 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
-
-	"github.com/JorgeToAn/pokedexcli/internal/api"
 )
 
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(c *api.Config)
+	callback    func(c *Config) error
 }
 
-func getCommands() map[string]cliCommand {
-	return map[string]cliCommand{
-		"help": {
-			name:        "help",
-			description: "Displays a list of available commands",
-			callback:    helpCommand,
-		},
-		"map": {
-			name:        "map",
-			description: "Displays the next 20 areas",
-			callback:    mapCommand,
-		},
-		"mapb": {
-			name:        "mapb",
-			description: "Displays the previous 20 areas",
-			callback:    mapbCommand,
-		},
-		"exit": {
-			name:        "exit",
-			description: "Exits the pokedex",
-			callback:    exitCommand,
-		},
-	}
-}
-
-func helpCommand(c *api.Config) {
+func helpCommand(c *Config) error {
 	availableCommands := getCommands()
 
 	fmt.Println("Available commands:")
 	for _, command := range availableCommands {
 		fmt.Printf("  %s: %s\n", command.name, command.description)
 	}
+	return nil
 }
 
-func mapCommand(c *api.Config) {
-	locations, err := api.GetNextLocationAreas(c)
+func mapCommand(c *Config) error {
+	locationAreasResp, err := c.ApiClient.GetLocationAreas(c.Next)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 
-	for _, area := range locations {
+	c.Next = locationAreasResp.Next
+	c.Previous = locationAreasResp.Previous
+
+	for _, area := range locationAreasResp.Results {
 		fmt.Printf("  %s\n", area.Name)
 	}
+	return nil
 }
 
-func mapbCommand(c *api.Config) {
-	locations, err := api.GetPreviousLocationAreas(c)
-	if err != nil {
-		fmt.Println(err)
-		return
+func mapbCommand(c *Config) error {
+	if c.Previous == nil {
+		return errors.New("no previous areas")
 	}
 
-	for _, area := range locations {
+	locationAreasResp, err := c.ApiClient.GetLocationAreas(c.Previous)
+	if err != nil {
+		return err
+	}
+
+	c.Next = locationAreasResp.Next
+	c.Previous = locationAreasResp.Previous
+
+	for _, area := range locationAreasResp.Results {
 		fmt.Printf("  %s\n", area.Name)
 	}
+	return nil
 }
 
-func exitCommand(c *api.Config) {
+func exitCommand(c *Config) error {
 	fmt.Println("Closing pokedex...")
 	os.Exit(0)
+	return nil
 }

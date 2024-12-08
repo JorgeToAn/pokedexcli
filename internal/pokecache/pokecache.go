@@ -5,11 +5,10 @@ import (
 	"time"
 )
 
-var mu sync.Mutex
-
 type Cache struct {
 	interval time.Duration
 	entries  map[string]cacheEntry
+	mux      *sync.Mutex
 }
 
 type cacheEntry struct {
@@ -21,6 +20,7 @@ func NewCache(interval time.Duration) Cache {
 	newCache := Cache{
 		interval: interval,
 		entries:  make(map[string]cacheEntry),
+		mux:      &sync.Mutex{},
 	}
 	go newCache.reapLoop()
 	return newCache
@@ -48,13 +48,13 @@ func (c Cache) reapLoop() {
 
 	for {
 		t := <-ticker.C
-		mu.Lock()
+		c.mux.Lock()
+		defer c.mux.Unlock()
 		for key, entry := range c.entries {
 			diff := t.Sub(entry.createdAt)
 			if diff > c.interval {
 				delete(c.entries, key)
 			}
 		}
-		mu.Unlock()
 	}
 }
