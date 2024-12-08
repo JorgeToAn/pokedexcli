@@ -6,52 +6,92 @@ import (
 	"net/http"
 )
 
-type LocationAreasResponse struct {
-	Count    int            `json:"count"`
-	Next     *string        `json:"next"`
-	Previous *string        `json:"previous"`
-	Results  []LocationArea `json:"results"`
+type LocationAreaDetailResponse struct {
+	EncounterMethodRates []struct {
+		EncounterMethod struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"encounter_method"`
+		VersionDetails []struct {
+			Rate    int `json:"rate"`
+			Version struct {
+				Name string `json:"name"`
+				URL  string `json:"url"`
+			} `json:"version"`
+		} `json:"version_details"`
+	} `json:"encounter_method_rates"`
+	GameIndex int `json:"game_index"`
+	ID        int `json:"id"`
+	Location  struct {
+		Name string `json:"name"`
+		URL  string `json:"url"`
+	} `json:"location"`
+	Name  string `json:"name"`
+	Names []struct {
+		Language struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"language"`
+		Name string `json:"name"`
+	} `json:"names"`
+	PokemonEncounters []struct {
+		Pokemon struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"pokemon"`
+		VersionDetails []struct {
+			EncounterDetails []struct {
+				Chance          int   `json:"chance"`
+				ConditionValues []any `json:"condition_values"`
+				MaxLevel        int   `json:"max_level"`
+				Method          struct {
+					Name string `json:"name"`
+					URL  string `json:"url"`
+				} `json:"method"`
+				MinLevel int `json:"min_level"`
+			} `json:"encounter_details"`
+			MaxChance int `json:"max_chance"`
+			Version   struct {
+				Name string `json:"name"`
+				URL  string `json:"url"`
+			} `json:"version"`
+		} `json:"version_details"`
+	} `json:"pokemon_encounters"`
 }
 
-type LocationArea struct {
-	Name string `json:"name"`
-	URL  string `json:"url"`
-}
-
-func (c Client) GetLocationAreas(url *string) (LocationAreasResponse, error) {
-	requestURL := baseURL + "/location-area"
-	if url != nil {
-		requestURL = *url
-	}
+func (c Client) GetLocationAreaDetail(areaName string) (LocationAreaDetailResponse, error) {
+	requestURL := baseURL + "/location-area/" + areaName
 
 	value, exists := c.cache.Get(requestURL)
 	if exists {
-		result := LocationAreasResponse{}
-		if err := json.Unmarshal(value, &result); err != nil {
-			return LocationAreasResponse{}, err
+		result := LocationAreaDetailResponse{}
+		err := json.Unmarshal(value, &result)
+		if err != nil {
+			return LocationAreaDetailResponse{}, err
 		}
+
 		return result, nil
 	}
 
-	request, err := http.NewRequest("GET", requestURL, nil)
+	req, err := http.NewRequest("GET", requestURL, nil)
 	if err != nil {
-		return LocationAreasResponse{}, err
+		return LocationAreaDetailResponse{}, err
 	}
 
-	resp, err := c.httpClient.Do(request)
+	res, err := c.httpClient.Do(req)
 	if err != nil {
-		return LocationAreasResponse{}, err
+		return LocationAreaDetailResponse{}, err
 	}
-	defer resp.Body.Close()
+	defer res.Body.Close()
 
-	data, err := io.ReadAll(resp.Body)
+	data, err := io.ReadAll(res.Body)
 	if err != nil {
-		return LocationAreasResponse{}, err
+		return LocationAreaDetailResponse{}, err
 	}
 
-	result := LocationAreasResponse{}
+	result := LocationAreaDetailResponse{}
 	if err = json.Unmarshal(data, &result); err != nil {
-		return LocationAreasResponse{}, err
+		return LocationAreaDetailResponse{}, err
 	}
 
 	c.cache.Add(requestURL, data)

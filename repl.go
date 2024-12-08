@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/JorgeToAn/pokedexcli/internal/api"
 )
@@ -23,14 +24,14 @@ func startRepl(config *Config) {
 		fmt.Print("pokedex > ")
 		scanner.Scan()
 
-		input := scanner.Text()
-		command, exists := commands[input]
+		name, args := cleanInput(scanner.Text())
+		command, exists := commands[name]
 		if !exists {
-			fmt.Printf("Command '%s' not found, use 'help' to see a list of available commands\n", input)
+			fmt.Printf("Command '%s' not found, use 'help' to see a list of available commands\n", name)
 			continue
 		}
 
-		err := command.callback(config)
+		err := command.callback(config, args)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -54,10 +55,25 @@ func getCommands() map[string]cliCommand {
 			description: "Displays the previous 20 areas",
 			callback:    mapbCommand,
 		},
+		"explore": {
+			name:        "explore",
+			description: "Shows the Pokemon in the given area",
+			callback:    exploreCommand,
+		},
 		"exit": {
 			name:        "exit",
 			description: "Exits the pokedex",
 			callback:    exitCommand,
 		},
 	}
+}
+
+func cleanInput(input string) (string, []string) {
+	lowered := strings.ToLower(input)
+	trimmed := strings.Trim(lowered, " ")
+	parts := strings.Split(trimmed, " ")
+
+	name := parts[0]
+	args := parts[1:]
+	return name, args
 }
