@@ -5,10 +5,6 @@ import (
 	"math/rand"
 )
 
-const (
-	baseCatchRate = 500
-)
-
 func catchCommand(config *Config, args ...string) error {
 	if len(args) != 1 {
 		fmt.Println("usage: catch <pokemon>")
@@ -20,8 +16,9 @@ func catchCommand(config *Config, args ...string) error {
 		return err
 	}
 
-	catchRand := rand.Intn(baseCatchRate)
-	if catchRand > pokemon.BaseExperience {
+	catchRand := rand.Float32()
+	// 1 - (BaseExperience / 500) = SuccessRate
+	if catchRand > float32(pokemon.BaseExperience)/500 {
 		fmt.Printf("%s was caught!\n", pokemon.Name)
 		config.CaughtPokemon[pokemon.Name] = pokemon
 	} else {
