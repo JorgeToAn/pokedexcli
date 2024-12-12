@@ -5,61 +5,46 @@ import (
 	"testing"
 )
 
-type inputResult struct {
-	name string
-	args []string
-}
-
 func TestCleanInput(t *testing.T) {
 	cases := []struct {
-		input  string
-		result struct {
-			name string
-			args []string
-		}
+		input    string
+		expected []string
 	}{
 		{
-			input: "test",
-			result: inputResult{
-				name: "test",
-				args: []string{},
-			},
+			input:    "hello world",
+			expected: []string{"hello", "world"},
 		},
 		{
-			input: "   map   ",
-			result: inputResult{
-				name: "map",
-				args: []string{},
-			},
+			input:    "bulbasaur SQUIRTLE Charmander",
+			expected: []string{"bulbasaur", "squirtle", "charmander"},
 		},
 		{
-			input: "MAP",
-			result: inputResult{
-				name: "map",
-				args: []string{},
-			},
+			input:    "TesT",
+			expected: []string{"test"},
 		},
 		{
-			input: "test 1 2 3",
-			result: inputResult{
-				name: "test",
-				args: []string{"1", "2", "3"},
-			},
+			input:    "   map   ",
+			expected: []string{"map"},
+		},
+		{
+			input:    "MAP",
+			expected: []string{"map"},
+		},
+		{
+			input:    "test 1 2 3",
+			expected: []string{"test", "1", "2", "3"},
 		},
 	}
 
 	for i, c := range cases {
 		t.Run(fmt.Sprintf("Test case %v", i), func(t *testing.T) {
-			name, args := cleanInput(c.input)
-			if name != c.result.name {
-				t.Errorf("expected name to be %s but got %s", c.result.name, name)
+			words := cleanInput(c.input)
+			if len(words) != len(c.expected) {
+				t.Errorf("args length of %v does not match the expected length of %v", len(words), len(c.expected))
 			}
-			if len(args) != len(c.result.args) {
-				t.Errorf("args length of %v does not match the expected length of %v", len(args), len(c.result.args))
-			}
-			for i, arg := range args {
-				if arg != c.result.args[i] {
-					t.Errorf("expected arg to be %v but got %v", c.result.args[i], arg)
+			for i, word := range words {
+				if word != c.expected[i] {
+					t.Errorf("expected word to be %v but got %v", c.expected[i], word)
 				}
 			}
 		})

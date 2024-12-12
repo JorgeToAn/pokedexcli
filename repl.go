@@ -18,7 +18,7 @@ type Config struct {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(c *Config, args []string) error
+	callback    func(config *Config, args ...string) error
 }
 
 func startRepl(config *Config) {
@@ -30,14 +30,17 @@ func startRepl(config *Config) {
 		fmt.Print("pokedex > ")
 		scanner.Scan()
 
-		name, args := cleanInput(scanner.Text())
-		command, exists := commands[name]
+		words := cleanInput(scanner.Text())
+		commandName := words[0]
+		args := words[1:]
+
+		command, exists := commands[commandName]
 		if !exists {
-			fmt.Printf("Command '%s' not found, use 'help' to see a list of available commands\n", name)
+			fmt.Println("unknown command")
 			continue
 		}
 
-		err := command.callback(config, args)
+		err := command.callback(config, args...)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -74,12 +77,10 @@ func getCommands() map[string]cliCommand {
 	}
 }
 
-func cleanInput(input string) (string, []string) {
+func cleanInput(input string) []string {
 	lowered := strings.ToLower(input)
 	trimmed := strings.Trim(lowered, " ")
-	parts := strings.Split(trimmed, " ")
+	words := strings.Split(trimmed, " ")
 
-	name := parts[0]
-	args := parts[1:]
-	return name, args
+	return words
 }

@@ -5,14 +5,14 @@ import (
 	"fmt"
 )
 
-func exploreCommand(c *Config, args []string) error {
+func exploreCommand(config *Config, args ...string) error {
 	if len(args) != 1 {
 		return errors.New("usage: explore <area-name>")
 	}
 	areaName := args[0]
 	fmt.Printf("Exploring %s...\n", areaName)
 
-	locationAreaDetail, err := c.ApiClient.GetLocationAreaDetail(areaName)
+	locationAreaDetail, err := config.ApiClient.GetLocationAreaDetail(areaName)
 	if err != nil {
 		return err
 	}

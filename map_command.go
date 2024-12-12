@@ -5,14 +5,14 @@ import (
 	"fmt"
 )
 
-func mapCommand(c *Config, args []string) error {
-	locationAreasResp, err := c.ApiClient.GetLocationAreas(c.Next)
+func mapCommand(config *Config, args ...string) error {
+	locationAreasResp, err := config.ApiClient.GetLocationAreas(config.Next)
 	if err != nil {
 		return err
 	}
 
-	c.Next = locationAreasResp.Next
-	c.Previous = locationAreasResp.Previous
+	config.Next = locationAreasResp.Next
+	config.Previous = locationAreasResp.Previous
 
 	for _, area := range locationAreasResp.Results {
 		fmt.Printf("  %s\n", area.Name)
@@ -20,18 +20,18 @@ func mapCommand(c *Config, args []string) error {
 	return nil
 }
 
-func mapbCommand(c *Config, args []string) error {
-	if c.Previous == nil {
+func mapbCommand(config *Config, args ...string) error {
+	if config.Previous == nil {
 		return errors.New("no previous areas")
 	}
 
-	locationAreasResp, err := c.ApiClient.GetLocationAreas(c.Previous)
+	locationAreasResp, err := config.ApiClient.GetLocationAreas(config.Previous)
 	if err != nil {
 		return err
 	}
 
-	c.Next = locationAreasResp.Next
-	c.Previous = locationAreasResp.Previous
+	config.Next = locationAreasResp.Next
+	config.Previous = locationAreasResp.Previous
 
 	for _, area := range locationAreasResp.Results {
 		fmt.Printf("  %s\n", area.Name)
