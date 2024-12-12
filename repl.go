@@ -10,9 +10,10 @@ import (
 )
 
 type Config struct {
-	Next      *string
-	Previous  *string
-	ApiClient api.Client
+	Next          *string
+	Previous      *string
+	ApiClient     api.Client
+	CaughtPokemon map[string]api.PokemonResponse
 }
 
 type cliCommand struct {
@@ -66,8 +67,13 @@ func getCommands() map[string]cliCommand {
 		},
 		"explore": {
 			name:        "explore",
-			description: "Shows the Pokemon in the given area",
+			description: "Shows the Pokemon in an area",
 			callback:    exploreCommand,
+		},
+		"catch": {
+			name:        "catch",
+			description: "Throw a pokeball at a Pokemon",
+			callback:    catchCommand,
 		},
 		"exit": {
 			name:        "exit",
