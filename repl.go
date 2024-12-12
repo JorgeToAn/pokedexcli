@@ -15,6 +15,12 @@ type Config struct {
 	ApiClient api.Client
 }
 
+type cliCommand struct {
+	name        string
+	description string
+	callback    func(c *Config, args []string) error
+}
+
 func startRepl(config *Config) {
 	scanner := bufio.NewScanner(os.Stdin)
 	commands := getCommands()
