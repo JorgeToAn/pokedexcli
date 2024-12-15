@@ -22,6 +22,7 @@ func catchCommand(config *Config, args ...string) error {
 	if catchRand > float32(pokemon.BaseExperience)/500 {
 		fmt.Printf("%s was caught!\n", pokemon.Name)
 		config.CaughtPokemon[pokemon.Name] = pokemon
+		fmt.Println("You may now inspect it with the inspect command")
 	} else {
 		fmt.Printf("%s escaped!\n", pokemon.Name)
 	}
