@@ -1,13 +1,14 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
 )
 
 func catchCommand(config *Config, args ...string) error {
 	if len(args) != 1 {
-		fmt.Println("usage: catch <pokemon>")
+		return errors.New("usage: catch <pokemon>")
 	}
 	fmt.Printf("Throwing a Pokeball at %s...\n", args[0])
 
